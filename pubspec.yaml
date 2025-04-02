@@ -38,6 +38,7 @@ dependencies:
   firebase_auth: ^5.5.2
   google_sign_in: ^6.3.0
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -54,6 +55,34 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  assets:
+    - assets/Json/a.json
+    - assets/Json/b.json
+    - assets/Json/c.json
+    - assets/Json/d.json
+    - assets/Json/e.json
+    - assets/Json/f.json
+    - assets/Json/g.json
+    - assets/Json/h.json
+    - assets/Json/i.json
+    - assets/Json/j.json
+    - assets/Json/k.json
+    - assets/Json/l.json
+    - assets/Json/m.json
+    - assets/Json/n.json
+    - assets/Json/o.json
+    - assets/Json/p.json
+    - assets/Json/q.json
+    - assets/Json/r.json
+    - assets/Json/s.json
+    - assets/Json/t.json
+    - assets/Json/u.json
+    - assets/Json/v.json
+    - assets/Json/w.json
+    - assets/Json/x.json
+    - assets/Json/y.json
+    - assets/Json/z.json
+
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
