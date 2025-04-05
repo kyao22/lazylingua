@@ -1,61 +1,85 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../model/dictionary_word_model.dart'; // Import model dữ liệu
+import '../model/dictionary_word_model.dart';
 
 class DictionaryScreen extends StatefulWidget {
   @override
   _DictionaryScreenState createState() => _DictionaryScreenState();
 }
 
-Future<List<dynamic>> loadAllWords() async {
-  List<String> files = [
-    'assets/Json/a.json',
-    'assets/Json/b.json',
-    'assets/Json/c.json',
-    'assets/Json/d.json',
-    'assets/Json/e.json',
-    'assets/Json/f.json',
-    'assets/Json/g.json',
-    'assets/Json/h.json',
-    'assets/Json/i.json',
-    'assets/Json/j.json',
-    'assets/Json/k.json',
-    'assets/Json/l.json',
-    'assets/Json/m.json',
-    'assets/Json/n.json',
-    'assets/Json/o.json',
-    'assets/Json/p.json',
-    'assets/Json/q.json',
-    'assets/Json/r.json',
-    'assets/Json/s.json',
-    'assets/Json/t.json',
-    'assets/Json/u.json',
-    'assets/Json/v.json',
-    'assets/Json/w.json',
-    'assets/Json/x.json',
-    'assets/Json/y.json',
-    'assets/Json/z.json',
-  ];
-
-  List<dynamic> allWords = [];
-
-  for (String file in files) {
-    String data = await rootBundle.loadString(file);
-    List<dynamic> words = jsonDecode(data);
-    allWords.addAll(words);
-  }
-
-  return allWords;
-}
-
 class _DictionaryScreenState extends State<DictionaryScreen> {
   late Future<List<dynamic>> wordsFuture;
+  List<dynamic> allWords = [];
+  List<dynamic> filteredWords = [];
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    wordsFuture = loadAllWords(); // Gọi hàm tải JSON
+    wordsFuture = loadAllWords();
+    searchController.addListener(onSearchChanged);
+  }
+
+  void onSearchChanged() {
+    String query = searchController.text.toLowerCase();
+    setState(() {
+      filteredWords = allWords
+          .where((word) => word['word'].toLowerCase().contains(query))
+          .toList();
+    });
+  }
+
+  Future<List<dynamic>> loadAllWords() async {
+    List<String> files = [
+      'assets/Json/a.json',
+      'assets/Json/b.json',
+      'assets/Json/c.json',
+      'assets/Json/d.json',
+      'assets/Json/e.json',
+      'assets/Json/f.json',
+      'assets/Json/g.json',
+      'assets/Json/h.json',
+      'assets/Json/i.json',
+      'assets/Json/j.json',
+      'assets/Json/k.json',
+      'assets/Json/l.json',
+      'assets/Json/m.json',
+      'assets/Json/n.json',
+      'assets/Json/o.json',
+      'assets/Json/p.json',
+      'assets/Json/q.json',
+      'assets/Json/r.json',
+      'assets/Json/s.json',
+      'assets/Json/t.json',
+      'assets/Json/u.json',
+      'assets/Json/v.json',
+      'assets/Json/w.json',
+      'assets/Json/x.json',
+      'assets/Json/y.json',
+      'assets/Json/z.json',
+    ];
+
+    List<dynamic> all = [];
+
+    for (String file in files) {
+      String data = await rootBundle.loadString(file);
+      List<dynamic> words = jsonDecode(data);
+      all.addAll(words);
+    }
+
+    setState(() {
+      allWords = all;
+      filteredWords = allWords;
+    });
+
+    return all;
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -66,28 +90,47 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
         future: wordsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator()); // Đang tải
+            return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Lỗi tải dữ liệu!")); // Báo lỗi
+            return Center(child: Text("Lỗi tải dữ liệu!"));
           } else {
-            List<dynamic> words = snapshot.data!;
-            return ListView.builder(
-              itemCount: words.length,
-              itemBuilder: (context, index) {
-                var word = words[index];
-                return ListTile(
-                  title: Text(word['word'], style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(word['pos']),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WordDetailScreen(word: word),
-                      ),
-                    );
-                  },
-                );
-              },
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      labelText: "Tìm kiếm từ...",
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredWords.length,
+                    itemBuilder: (context, index) {
+                      var word = filteredWords[index];
+                      return ListTile(
+                        title: Text(
+                          word['word'],
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(word['pos']),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WordDetailScreen(word: word),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           }
         },
