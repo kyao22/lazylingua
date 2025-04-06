@@ -121,7 +121,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         ElevatedButton(
-          onPressed: () => setState(() => showAnswer = true),
+          onPressed: () => setState(() => showAnswer = !showAnswer),
           child: Text("Show Answer"),
         ),
         ElevatedButton(
