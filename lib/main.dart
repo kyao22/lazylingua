@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'UI/FlashCard.dart';
 import 'firebase_options.dart';
 import '../UI/Login.dart';
 import '../UI/Dictionary.dart';
@@ -33,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   // Danh sách các widget sẽ hiển thị tương ứng với từng nút.
   static final List<Widget> _widgetOptions = <Widget>[
     DictionaryScreen(),
-    Center(child: Text('Flash Card Page')),
+    FlashCardScreen(),
     UserScreen(),
   ];
 
