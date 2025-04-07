@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../model/wordRepository.dart';
+import '../viewModel/bookmark.dart';
 
 class FlashCardScreen extends StatefulWidget {
   @override
@@ -21,46 +22,12 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   }
 
   Future<void> loadWords() async {
-    List<String> files = [
-      'assets/Json/a.json',
-      'assets/Json/b.json',
-      'assets/Json/c.json',
-      'assets/Json/d.json',
-      'assets/Json/e.json',
-      'assets/Json/f.json',
-      'assets/Json/g.json',
-      'assets/Json/h.json',
-      'assets/Json/i.json',
-      'assets/Json/j.json',
-      'assets/Json/k.json',
-      'assets/Json/l.json',
-      'assets/Json/m.json',
-      'assets/Json/n.json',
-      'assets/Json/o.json',
-      'assets/Json/p.json',
-      'assets/Json/q.json',
-      'assets/Json/r.json',
-      'assets/Json/s.json',
-      'assets/Json/t.json',
-      'assets/Json/u.json',
-      'assets/Json/v.json',
-      'assets/Json/w.json',
-      'assets/Json/x.json',
-      'assets/Json/y.json',
-      'assets/Json/z.json',
-    ];
-
-    List<dynamic> loadedWords = [];
-    for (String file in files) {
-      String data = await rootBundle.loadString(file);
-      List<dynamic> words = jsonDecode(data);
-      loadedWords.addAll(words);
-    }
+    List<dynamic> words = await WordRepository().getAllWords();
 
     setState(() {
-      allWords = loadedWords;
-      pickRandomWord(); // lấy từ ngẫu nhiên khi load xong
+      allWords = words.where((word) => word['senses'] != null && word['senses'].isNotEmpty).toList();
     });
+    pickRandomWord(); // chỉ gọi khi đã có dữ liệu
   }
 
   void pickRandomWord() {
@@ -73,68 +40,196 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   @override
   Widget build(BuildContext context) {
     if (allWords.isEmpty || currentWord == null) {
-      return Scaffold(
-        appBar: AppBar(title: Text("Flash Cards")),
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final definition = currentWord['senses'][0]['definition'];
     final phonetic = currentWord['phonetic_text'] ?? '';
+    bool isBookmarked = context.watch<BookmarkManager>().isBookmarked(
+      currentWord['word'],
+    );
 
     return Scaffold(
-        appBar: AppBar(title: Text("Flash Cards")),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/nen.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            flexibleSpace: Align(
+              alignment: Alignment.bottomCenter,
               child: Container(
-                padding: EdgeInsets.all(24),
                 width: double.infinity,
-                height: 300,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      currentWord['word'],
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 20),
-                    if (showAnswer) ...[
-                      if (phonetic.isNotEmpty)
-                        Text("Phonetic: $phonetic", style: TextStyle(fontSize: 20)),
-                      SizedBox(height: 10),
-                      Text("Meaning: $definition", style: TextStyle(fontSize: 18)),
-                    ] else
-                      Text("Tap 'Show Answer' to reveal", style: TextStyle(color: Colors.grey)),
-                  ],
+                height: kToolbarHeight,
+                margin: EdgeInsets.only(bottom: 4),
+                decoration: BoxDecoration(
+                  color: Colors.blue[300],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                alignment: Alignment.centerLeft,
+                padding: EdgeInsets.only(left: 16),
+                child: Text(
+                  "Flash Cards",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
+            // Remove the title since we're using flexibleSpace
+            title: null,
           ),
         ),
-        bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        ElevatedButton(
-          onPressed: () => setState(() => showAnswer = !showAnswer),
-          child: Text("Show Answer"),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              pickRandomWord();
-            });
-          },
-          child: Text("Next"),
-        ),
-      ],
-    ),
-        ),
+      ),
+      body: Stack(
+        children: [
+          // ẢNH NỀN
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/anhbautroi.png',
+
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // CÁC THÀNH PHẦN GIAO DIỆN
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Spacer(),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        showAnswer = !showAnswer;
+                      });
+                    },
+                    child: Card(
+                      shadowColor: Colors.green,
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: Colors.blue, width: 2),
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.all(24),
+                        width: double.infinity,
+                        height: 300,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/nen1.png'),
+
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              currentWord['word'],
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+
+                                shadows: [
+                                  Shadow(
+                                    blurRadius: 3.0,
+                                    color: Colors.black,
+                                    offset: Offset(1.0, 1.0),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            if (showAnswer) ...[
+                              if (phonetic.isNotEmpty)
+                                Text(
+                                  "Phonetic: $phonetic",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 3.0,
+                                        color: Colors.black,
+                                        offset: Offset(1.0, 1.0),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              SizedBox(height: 10),
+                              Text(
+                                "Meaning: $definition",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 3.0,
+                                      color: Colors.black,
+                                      offset: Offset(1.0, 1.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ] else
+                              Text(
+                                "Tap this card to reveal",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  shadows: [
+                                    Shadow(
+                                      blurRadius: 3.0,
+                                      color: Colors.black,
+                                      offset: Offset(1.0, 1.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            pickRandomWord();
+                          });
+                        },
+                        icon: Icon(Icons.next_plan),
+                        label: Text("Next word"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

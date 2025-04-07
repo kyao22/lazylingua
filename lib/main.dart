@@ -1,24 +1,39 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:lazylingua/UI/User.dart';
 import 'UI/FlashCard.dart';
+import 'UI/LoadingScreen.dart';
+import 'UI/Quiz.dart';
+import 'UI/login_screen.dart';
 import 'firebase_options.dart';
-import '../UI/Login.dart';
 import '../UI/Dictionary.dart';
+import '../viewModel/bookmark.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => BookmarkManager()..loadBookmarks(), // load khi khởi động
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Demo NavBottom',
-      home: HomePage(),
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => SplashScreen(),
+          //'/home': (context) => LoginScreen(),
+          '/home': (context) => HomePage(),}
     );
   }
 }
@@ -35,7 +50,8 @@ class _HomePageState extends State<HomePage> {
   static final List<Widget> _widgetOptions = <Widget>[
     DictionaryScreen(),
     FlashCardScreen(),
-    UserScreen(),
+    QuizScreen(),
+    ProfileScreen(user: FirebaseAuth.instance.currentUser),
   ];
 
   void _onItemTapped(int index) {
@@ -48,10 +64,30 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Demo NavBottom'),
+        backgroundColor: Colors.transparent, // Làm trong suốt để thấy ảnh nền
+        elevation: 0,
+        titleSpacing: 50,
+        title: Image.asset(
+          "assets/images/logocuak.png",
+          width: 400,
+          height: 65,
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/nen.png"), // ảnh nền
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
+        iconSize: 30,
+        backgroundColor : Colors.white,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.black,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const <BottomNavigationBarItem>[
@@ -62,6 +98,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.flash_on),
             label: 'Flash Card',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.quiz),
+            label: 'Quiz',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
