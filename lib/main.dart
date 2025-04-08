@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lazylingua/UI/User.dart';
 import 'UI/FlashCard.dart';
+import 'UI/LoadingScreen.dart';
+import 'UI/login_screen.dart';
 import 'firebase_options.dart';
-import '../UI/Login.dart';
 import '../UI/Dictionary.dart';
 import '../viewModel/bookmark.dart';
 
@@ -24,8 +27,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Demo NavBottom',
-      home: HomePage(),
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/',
+        routes: {
+        '/': (context) => SplashScreen(),
+        '/home': (context) => LoginScreen(),
+        '/dictionary': (context) => HomePage(),}
     );
   }
 }
@@ -42,7 +49,7 @@ class _HomePageState extends State<HomePage> {
   static final List<Widget> _widgetOptions = <Widget>[
     DictionaryScreen(),
     FlashCardScreen(),
-    UserScreen(),
+    ProfileScreen(user: FirebaseAuth.instance.currentUser),
   ];
 
   void _onItemTapped(int index) {
@@ -55,10 +62,17 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Demo NavBottom'),
+        backgroundColor: Color(0xFFD81B60),
+        title: Image.asset("assets/images/LazyLingua.png", width: 360, height: 50),
+        titleSpacing: 50,
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
+        iconSize: 30,
+        backgroundColor : Colors.greenAccent,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.black,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const <BottomNavigationBarItem>[

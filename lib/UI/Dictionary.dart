@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/wordRepository.dart';
 import '../viewModel/bookmark.dart';
+import 'package:flutter/services.dart';
 
 class DictionaryScreen extends StatefulWidget {
   @override
@@ -51,10 +52,14 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Dictionary")),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: Text("Dictionary", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold))),
       body: FutureBuilder<List<dynamic>>(
         future: wordsFuture,
         builder: (context, snapshot) {
@@ -75,7 +80,9 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                           labelText: "Tìm kiếm từ...",
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.search),
+                          borderSide: BorderSide(color: Colors.blueAccent),
                         ),
+                        prefixIcon: Icon(Icons.search),
                       ),
                       Row(
                         children: [
@@ -124,7 +131,31 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                             ),
                           );
                         },
+                        child: Card(
+                          color: Colors.white,
+                          elevation: 1,
+                          margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  word['word'],
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  word['pos'],
+                                  style: TextStyle(color: Colors.grey[900]),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       );
+
                     },
                   ),
                 ),
@@ -141,7 +172,6 @@ class WordDetailScreen extends StatelessWidget {
   final Map<String, dynamic> word;
 
   WordDetailScreen({required this.word});
-
   @override
   Widget build(BuildContext context) {
     bool isBookmarked = context.watch<BookmarkManager>().isBookmarked(word['word']);
@@ -166,7 +196,8 @@ class WordDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(word['word'], style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text(word['word'], style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                SizedBox(width: 10),
             Text(word['pos'], style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
             SizedBox(height: 10),
             if (word['phonetic_text'] != null)
@@ -174,7 +205,10 @@ class WordDetailScreen extends StatelessWidget {
             SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
+                shrinkWrap: true,
                 itemCount: word['senses'].length,
+                physics: BouncingScrollPhysics(),
+                padding: EdgeInsets.zero,
                 itemBuilder: (context, index) {
                   var sense = word['senses'][index];
                   return Padding(
