@@ -1,6 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../model/wordRepository.dart';
+import '../viewModel/bookmark.dart';
 
 class DictionaryScreen extends StatefulWidget {
   @override
@@ -12,12 +13,21 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   List<dynamic> allWords = [];
   List<dynamic> filteredWords = [];
   TextEditingController searchController = TextEditingController();
+  bool showBookmarksOnly = false;
+
 
   @override
   void initState() {
     super.initState();
-    wordsFuture = loadAllWords();
+    wordsFuture = WordRepository().getAllWords();
     searchController.addListener(onSearchChanged);
+
+    wordsFuture.then((words) {
+      setState(() {
+        allWords = words;
+        filteredWords = words;
+      });
+    });
   }
 
   void onSearchChanged() {
@@ -26,53 +36,13 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       filteredWords = allWords
           .where((word) => word['word'].toLowerCase().contains(query))
           .toList();
+
+      if (showBookmarksOnly) {
+        filteredWords = filteredWords.where((word) {
+          return context.read<BookmarkManager>().isBookmarked(word['word']);
+        }).toList();
+      }
     });
-  }
-
-  Future<List<dynamic>> loadAllWords() async {
-    List<String> files = [
-      'assets/Json/a.json',
-      'assets/Json/b.json',
-      'assets/Json/c.json',
-      'assets/Json/d.json',
-      'assets/Json/e.json',
-      'assets/Json/f.json',
-      'assets/Json/g.json',
-      'assets/Json/h.json',
-      'assets/Json/i.json',
-      'assets/Json/j.json',
-      'assets/Json/k.json',
-      'assets/Json/l.json',
-      'assets/Json/m.json',
-      'assets/Json/n.json',
-      'assets/Json/o.json',
-      'assets/Json/p.json',
-      'assets/Json/q.json',
-      'assets/Json/r.json',
-      'assets/Json/s.json',
-      'assets/Json/t.json',
-      'assets/Json/u.json',
-      'assets/Json/v.json',
-      'assets/Json/w.json',
-      'assets/Json/x.json',
-      'assets/Json/y.json',
-      'assets/Json/z.json',
-    ];
-
-    List<dynamic> all = [];
-
-    for (String file in files) {
-      String data = await rootBundle.loadString(file);
-      List<dynamic> words = jsonDecode(data);
-      all.addAll(words);
-    }
-
-    setState(() {
-      allWords = all;
-      filteredWords = allWords;
-    });
-
-    return all;
   }
 
   @override
@@ -101,16 +71,33 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      labelText: "Tìm kiếm từ...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(40.0),
-                        borderSide: BorderSide(color: Colors.blueAccent),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          labelText: "Tìm kiếm từ...",
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blueAccent)
+                          ),
+                          prefixIcon: Icon(Icons.search),
+                        ),
                       ),
-                      prefixIcon: Icon(Icons.search),
-                    ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: showBookmarksOnly,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                showBookmarksOnly = value!;
+                                onSearchChanged(); // Apply filter after state change
+                              });
+                            },
+                          ),
+                          Text("Chỉ hiển thị từ đã đánh dấu")
+                        ],
+                      )
+                    ],
                   ),
                 ),
                 Expanded(
@@ -118,6 +105,8 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                     itemCount: filteredWords.length,
                     itemBuilder: (context, index) {
                       var word = filteredWords[index];
+                      bool isBookmarked = context.watch<BookmarkManager>().isBookmarked(word['word']);
+
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -134,24 +123,38 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
                               children: [
-                                Text(
-                                  word['word'],
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        word['word'],
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        word['pos'],
+                                        style: TextStyle(color: Colors.grey[900]),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(height: 4),
-                                Text(
-                                  word['pos'],
-                                  style: TextStyle(color: Colors.grey[900]),
+                                IconButton(
+                                  icon: Icon(
+                                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                                    color: isBookmarked ? Colors.amber : null,
+                                  ),
+                                  onPressed: () {
+                                    context.read<BookmarkManager>().toggleBookmark(word);
+                                  },
                                 ),
                               ],
                             ),
                           ),
                         ),
                       );
-
                     },
                   ),
                 ),
@@ -170,8 +173,23 @@ class WordDetailScreen extends StatelessWidget {
   WordDetailScreen({required this.word});
   @override
   Widget build(BuildContext context) {
+    bool isBookmarked = context.watch<BookmarkManager>().isBookmarked(word['word']);
+
     return Scaffold(
-      appBar: AppBar(title: Text(word['word'])),
+      appBar: AppBar(
+        title: Text(word['word']),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              color: isBookmarked ? Colors.amber : null,
+            ),
+            onPressed: () {
+              context.read<BookmarkManager>().toggleBookmark(word);
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
