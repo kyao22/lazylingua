@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
+import '../viewModel/bookmark.dart';
 
 class ProfileScreen extends StatelessWidget {
   final User? user;
@@ -44,12 +47,13 @@ class ProfileScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
               Spacer(),
-
               // Nút đăng xuất
               ElevatedButton(
-
                 onPressed: () async {
+                  final bookmarkManager = Provider.of<BookmarkManager>(context, listen: false);
+                  await bookmarkManager.saveToFirebase(FirebaseAuth.instance.currentUser!.uid);
                   await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacementNamed(context, '/home');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,

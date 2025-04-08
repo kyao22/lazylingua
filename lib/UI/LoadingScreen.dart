@@ -1,5 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
+
+
+import '../viewModel/bookmark.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -10,10 +15,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    checkLogin();
+  }
 
-    Timer(Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/home');
-    });
+  void checkLogin() async {
+    await Future.delayed(Duration(seconds: 3)); // Hiệu ứng splash
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null && !user.isAnonymous) {
+      // Đăng nhập rồi, load dữ liệu nếu cần
+      await context.read<BookmarkManager>().loadFromFirebase();
+      Navigator.pushReplacementNamed(context, '/dictionary');
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override
