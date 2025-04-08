@@ -74,7 +74,6 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   Widget build(BuildContext context) {
     if (allWords.isEmpty || currentWord == null) {
       return Scaffold(
-        appBar: AppBar(title: Text("Flash Cards")),
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -83,58 +82,86 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
     final phonetic = currentWord['phonetic_text'] ?? '';
 
     return Scaffold(
-        appBar: AppBar(title: Text("Flash Cards")),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 6,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              child: Container(
-                padding: EdgeInsets.all(24),
-                width: double.infinity,
-                height: 300,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      currentWord['word'],
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+        appBar: AppBar(
+            backgroundColor: Colors.greenAccent,
+            title: Text("Flash Cards", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25))),
+      body: Stack(
+        children: [
+          // ẢNH NỀN
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/hinh-nen-nau-pastel.jpg', // Đường dẫn ảnh trong thư mục assets
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // CÁC THÀNH PHẦN GIAO DIỆN
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Spacer(),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        showAnswer = !showAnswer;
+                      });
+                    },
+                    child: Card(
+                      shadowColor: Colors.green,
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Container(
+                        padding: EdgeInsets.all(24),
+                        width: double.infinity,
+                        height: 300,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              currentWord['word'],
+                              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 20),
+                            if (showAnswer) ...[
+                              if (phonetic.isNotEmpty)
+                                Text("Phonetic: $phonetic", style: TextStyle(fontSize: 20)),
+                              SizedBox(height: 10),
+                              Text("Meaning: $definition", style: TextStyle(fontSize: 18)),
+                            ] else
+                              Text("Tap this card to reveal", style: TextStyle(color: Colors.grey)),
+                          ],
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 20),
-                    if (showAnswer) ...[
-                      if (phonetic.isNotEmpty)
-                        Text("Phonetic: $phonetic", style: TextStyle(fontSize: 20)),
-                      SizedBox(height: 10),
-                      Text("Meaning: $definition", style: TextStyle(fontSize: 18)),
-                    ] else
-                      Text("Tap 'Show Answer' to reveal", style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
+                  ),
+                  Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            pickRandomWord();
+                          });
+                        },
+                        icon: Icon(Icons.next_plan),
+                        label: Text("Next word"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-        bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        ElevatedButton(
-          onPressed: () => setState(() => showAnswer = !showAnswer),
-          child: Text("Show Answer"),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            setState(() {
-              pickRandomWord();
-            });
-          },
-          child: Text("Next"),
-        ),
-      ],
-    ),
-        ),
+        ],
+      ),
     );
   }
 }
