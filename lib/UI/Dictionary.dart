@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/wordRepository.dart';
 import '../viewModel/bookmark.dart';
-import 'package:flutter/services.dart';
 
 class DictionaryScreen extends StatefulWidget {
   @override
@@ -78,11 +77,11 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                         controller: searchController,
                         decoration: InputDecoration(
                           labelText: "Tìm kiếm từ...",
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blueAccent)
+                          ),
                           prefixIcon: Icon(Icons.search),
-                          borderSide: BorderSide(color: Colors.blueAccent),
                         ),
-                        prefixIcon: Icon(Icons.search),
                       ),
                       Row(
                         children: [
@@ -108,21 +107,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                       var word = filteredWords[index];
                       bool isBookmarked = context.watch<BookmarkManager>().isBookmarked(word['word']);
 
-                      return ListTile(
-                        title: Text(
-                          word['word'],
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(word['pos']),
-                        trailing: IconButton(
-                          icon: Icon(
-                            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                            color: isBookmarked ? Colors.amber : null,
-                          ),
-                          onPressed: () {
-                            context.read<BookmarkManager>().toggleBookmark(word);
-                          },
-                        ),
+                      return GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
@@ -138,24 +123,38 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            child: Row(
                               children: [
-                                Text(
-                                  word['word'],
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        word['word'],
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        word['pos'],
+                                        style: TextStyle(color: Colors.grey[900]),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(height: 4),
-                                Text(
-                                  word['pos'],
-                                  style: TextStyle(color: Colors.grey[900]),
+                                IconButton(
+                                  icon: Icon(
+                                    isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                                    color: isBookmarked ? Colors.amber : null,
+                                  ),
+                                  onPressed: () {
+                                    context.read<BookmarkManager>().toggleBookmark(word);
+                                  },
                                 ),
                               ],
                             ),
                           ),
                         ),
                       );
-
                     },
                   ),
                 ),

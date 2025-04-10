@@ -38,7 +38,7 @@ dependencies:
   firebase_auth: ^5.5.2
   google_sign_in: ^6.3.0
 
-  translator: ^0.1.7
+  translator: ^1.0.3+1
   shared_preferences: ^2.2.2
   provider: ^6.1.1
 
