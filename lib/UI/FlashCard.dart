@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/wordRepository.dart';
 import '../viewModel/bookmark.dart';
+import '../UI/custom_modal.dart';
 
 class FlashCardScreen extends StatefulWidget {
   @override
@@ -14,6 +15,10 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   late dynamic currentWord;
   bool showAnswer = false;
   final Random random = Random();
+
+  // Vị trí của nút kéo thả
+  double _xPosition = 20;
+  double _yPosition = 20;
 
   @override
   void initState() {
@@ -27,7 +32,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
     setState(() {
       allWords = words.where((word) => word['senses'] != null && word['senses'].isNotEmpty).toList();
     });
-    pickRandomWord(); // chỉ gọi khi đã có dữ liệu
+    pickRandomWord();
   }
 
   void pickRandomWord() {
@@ -84,7 +89,6 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
                 ),
               ),
             ),
-            // Remove the title since we're using flexibleSpace
             title: null,
           ),
         ),
@@ -95,12 +99,11 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
           Positioned.fill(
             child: Image.asset(
               'assets/images/anhbautroi.png',
-
               fit: BoxFit.cover,
             ),
           ),
 
-          // CÁC THÀNH PHẦN GIAO DIỆN
+          // GIAO DIỆN CHÍNH
           Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -128,7 +131,6 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
                           borderRadius: BorderRadius.circular(16),
                           image: DecorationImage(
                             image: AssetImage('assets/images/nen1.png'),
-
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -141,7 +143,6 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
                                 fontSize: 32,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-
                                 shadows: [
                                   Shadow(
                                     blurRadius: 3.0,
@@ -225,6 +226,49 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
                     ],
                   ),
                 ],
+              ),
+            ),
+          ),
+
+          // NÚT KÉO/THẢ HIỂN THỊ TRÌNH DỊCH
+          Positioned(
+            left: _xPosition,
+            top: _yPosition,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                setState(() {
+                  _xPosition = (_xPosition + details.delta.dx)
+                      .clamp(0, MediaQuery.of(context).size.width - 60);
+                  _yPosition = (_yPosition + details.delta.dy)
+                      .clamp(0, 690 - 60); // Điều chỉnh nếu cần
+                });
+              },
+              onTap: () {
+                showCustomModal(context);
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/images/logodich.png',
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
           ),

@@ -211,39 +211,39 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
             left: _xPosition,
             top: _yPosition,
             child: GestureDetector(
-              onPanUpdate: (details) {
-                setState(() {
-                  _xPosition = (_xPosition + details.delta.dx).clamp(0, MediaQuery.of(context).size.width - 60);
-                  _yPosition = (_yPosition + details.delta.dy).clamp(0, 690 - 60);
-                });
-              },
-              onTap: () {
-                showCustomModal(context);
-              },
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12), // Rounded corners
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12), // Match border radius with container
-                  child: Image.asset(
-                    'assets/images/logodich.png',
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
+                onPanUpdate: (details) {
+                  setState(() {
+                    _xPosition = (_xPosition + details.delta.dx).clamp(0, MediaQuery.of(context).size.width - 60);
+                    _yPosition = (_yPosition + details.delta.dy).clamp(0, 690 - 60);
+                  });
+                },
+                onTap: () {
+                  showCustomModal(context);
+                },
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
-                ),
-              )
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12), // Match border radius with container
+                    child: Image.asset(
+                      'assets/images/logodich.png',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )
             ),
           ),
         ],
@@ -257,6 +257,7 @@ class WordDetailScreen extends StatelessWidget {
   final Map<String, dynamic> word;
 
   WordDetailScreen({required this.word});
+
   @override
   Widget build(BuildContext context) {
     bool isBookmarked = context.watch<BookmarkManager>().isBookmarked(word['word']);
@@ -276,61 +277,115 @@ class WordDetailScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-                Text(word['word'], style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+      body: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SelectableText(
+                  word['word'],
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
                 SizedBox(width: 10),
-            Text(word['pos'], style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic)),
-            SizedBox(height: 10),
-            if (word['phonetic_text'] != null)
-              Text("Phonetic: ${word['phonetic_text']}", style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: word['senses'].length,
-                physics: BouncingScrollPhysics(),
-                padding: EdgeInsets.zero,
-                  itemBuilder: (context, index) {
-                    var sense = word['senses'][index];
-                    return Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Container(
-                        padding: EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Colors.blue,
-                            width: 1.5,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("• ${sense['definition']}", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: sense['examples'].map<Widget>((example) {
-                                return Padding(
-                                  padding: EdgeInsets.only(left: 16.0, top: 4.0),
-                                  child: Text("- ${example['x']}"),
-                                );
-                              }).toList(),
+                SelectableText(
+                  word['pos'],
+                  style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+                ),
+                SizedBox(height: 10),
+                if (word['phonetic_text'] != null)
+                  SelectableText(
+                    "Phonetic: ${word['phonetic_text']}",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: word['senses'].length,
+                    physics: BouncingScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemBuilder: (context, index) {
+                      var sense = word['senses'][index];
+                      return Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Container(
+                          padding: EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.blue,
+                              width: 1.5,
                             ),
-                          ],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SelectableText(
+                                "• ${sense['definition']}",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: sense['examples'].map<Widget>((example) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(left: 16.0, top: 4.0),
+                                    child: SelectableText(
+                                      "- ${example['x']}",
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Đặt icon dịch ở góc phải
+          Positioned(
+            right: 16, // Khoảng cách từ bên phải màn hình
+            top: 16,   // Khoảng cách từ trên cùng
+            child: GestureDetector(
+              onTap: () {
+                showCustomModal(context); // Hiển thị modal khi nhấn vào icon
+              },
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/images/logodich.png',
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+
+
