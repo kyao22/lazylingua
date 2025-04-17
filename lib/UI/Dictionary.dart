@@ -4,6 +4,7 @@ import '../model/wordRepository.dart';
 import '../viewModel/bookmark.dart';
 import 'custom_modal.dart';
 
+
 class DictionaryScreen extends StatefulWidget {
   @override
   _DictionaryScreenState createState() => _DictionaryScreenState();
@@ -249,7 +250,6 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
         ],
       ),
     );
-
   }
 }
 
