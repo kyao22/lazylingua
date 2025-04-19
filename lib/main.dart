@@ -10,6 +10,7 @@ import 'UI/login_screen.dart';
 import 'firebase_options.dart';
 import '../UI/Dictionary.dart';
 import '../viewModel/bookmark.dart';
+import 'UI/chat_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +19,7 @@ Future<void> main() async {
   );
   runApp(
     ChangeNotifierProvider(
-      create: (context) => BookmarkManager()..loadBookmarks(), // load khi khởi động
+      create: (context) => BookmarkManager()..loadBookmarks(),
       child: MyApp(),
     ),
   );
@@ -28,12 +29,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        initialRoute: '/',
-        routes: {
-          '/': (context) => SplashScreen(),
-          //'/home': (context) => LoginScreen(),
-          '/home': (context) => HomePage(),}
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(),
+        '/home': (context) => LoginScreen(),
+        '/dictionary': (context) => HomePage(),
+      },
     );
   }
 }
@@ -47,12 +49,19 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   // Danh sách các widget sẽ hiển thị tương ứng với từng nút.
-  static final List<Widget> _widgetOptions = <Widget>[
-    DictionaryScreen(),
-    FlashCardScreen(),
-    QuizScreen(),
-    ProfileScreen(user: FirebaseAuth.instance.currentUser),
-  ];
+  late final List<Widget> _widgetOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _widgetOptions = [
+      DictionaryScreen(),
+      FlashCardScreen(),
+      QuizScreen(),
+      ProfileScreen(user: FirebaseAuth.instance.currentUser),
+      ChatPage(), // trang chat sẽ được giữ trạng thái
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -64,7 +73,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // Làm trong suốt để thấy ảnh nền
+        backgroundColor: Colors.transparent,
         elevation: 0,
         titleSpacing: 50,
         title: Image.asset(
@@ -75,16 +84,19 @@ class _HomePageState extends State<HomePage> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("assets/images/nen.png"), // ảnh nền
+              image: AssetImage("assets/images/nen.png"),
               fit: BoxFit.cover,
             ),
           ),
         ),
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetOptions,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         iconSize: 30,
-        backgroundColor : Colors.white,
+        backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.black,
@@ -106,6 +118,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'User',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.android),
+            label: 'ChatBot',
           ),
         ],
       ),

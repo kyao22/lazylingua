@@ -44,12 +44,11 @@ class ProfileScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 16),
               ),
               Spacer(),
-
               // Nút đăng xuất
               ElevatedButton(
-
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacementNamed(context, '/home');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,

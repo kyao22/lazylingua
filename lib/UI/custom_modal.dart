@@ -12,7 +12,6 @@ void showCustomModal(BuildContext context) {
     },
   );
 }
-
 // Widget cho nội dung modal có tích hợp trang dịch
 class CustomModalContent extends StatefulWidget {
   const CustomModalContent({Key? key}) : super(key: key);
