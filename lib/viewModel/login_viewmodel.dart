@@ -18,6 +18,7 @@ class LoginViewModel {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng nhập thành công!')),
       );
+      Navigator.pushReplacementNamed(context, '/dictionary');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: $e')),
