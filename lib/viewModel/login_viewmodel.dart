@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:provider/provider.dart';
 
 import 'bookmark.dart';
+
 
 class LoginViewModel {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -43,6 +45,7 @@ class LoginViewModel {
 
       await _auth.signInWithCredential(credential);
       await context.read<BookmarkManager>().loadFromFirebase();
+
       Navigator.pushReplacementNamed(context, '/dictionary');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

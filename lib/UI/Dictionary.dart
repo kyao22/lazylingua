@@ -14,8 +14,10 @@ class DictionaryScreen extends StatefulWidget {
 }
 
 class _DictionaryScreenState extends State<DictionaryScreen> {
+
   double _xPosition = 270;
   double _yPosition = 35;
+
   List<dynamic> allWords = [];
   List<dynamic> filteredWords = [];
   TextEditingController searchController = TextEditingController();
@@ -25,9 +27,17 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   @override
   void initState() {
     super.initState();
+
     allWords = widget.words;
     filteredWords = widget.words;
     searchController.addListener(onSearchChanged);
+
+    wordsFuture.then((words) {
+      setState(() {
+        allWords = words;
+        filteredWords = words;
+      });
+    });
   }
 
   void onSearchChanged() {
@@ -235,8 +245,6 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
               ),
             ),
           ),
-
-
         ],
       ),
     );
@@ -378,4 +386,3 @@ class WordDetailScreen extends StatelessWidget {
     );
   }
 }
-

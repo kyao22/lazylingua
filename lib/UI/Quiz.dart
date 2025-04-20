@@ -45,6 +45,7 @@ class _QuizScreenState extends State<QuizScreen> {
     await prefs.setInt('highestStreak', highestStreak);
   }
 
+
   Future<void> saveCurrentStreak() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('currentStreak', currentStreak);

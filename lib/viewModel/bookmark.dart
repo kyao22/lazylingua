@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,6 @@ class BookmarkManager extends ChangeNotifier {
     String data = jsonEncode(_bookmarkedWords);
     await prefs.setString('bookmarks', data);
   }
-
   Future<void> saveToFirebase(String uid) async {
     try {
       final firestore = FirebaseFirestore.instance;

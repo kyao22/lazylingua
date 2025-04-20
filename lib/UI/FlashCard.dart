@@ -24,6 +24,7 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
   double _xPosition = 270;
   double _yPosition = 500;
 
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +84,15 @@ class _FlashCardScreenState extends State<FlashCardScreen> {
                     color: Colors.white,
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/images/logodich.png',
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
