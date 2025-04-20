@@ -1,43 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
+import '../viewModel/login_viewmodel.dart';
 class LoginScreen extends StatefulWidget {
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final viewModel = LoginViewModel();
   bool _isLoading = false;
-
-  Future<void> _signInWithGoogle() async {
-    try {
-      setState(() => _isLoading = true);
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
-      if (googleUser == null) {
-        setState(() => _isLoading = false);
-        return; // Người dùng hủy đăng nhập
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      Navigator.pushReplacementNamed(context, '/dictionary');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google Sign-In failed: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,35 +19,84 @@ class _LoginScreenState extends State<LoginScreen> {
           ? Center(child: CircularProgressIndicator())
           : Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset('assets/images/logolazy.png', height: 120),
               SizedBox(height: 32),
-              Text(
-                "Welcome!",
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
+              Text("Welcome!",
+                  style: TextStyle(
+                      fontSize: 38, fontWeight: FontWeight.bold)),
               SizedBox(height: 12),
               Text(
-                "Sign in with your Google account to continue.",
+                "Please sign in with your account to continue.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, color: Colors.grey[700]),
               ),
-              SizedBox(height: 32),
+              SizedBox(height: 16),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+              ),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(labelText: 'Password'),
+              ),
+              SizedBox(height: 33),
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _signInWithGoogle,
-                  label: Text(
-                    'Sign in with Google',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                height: 50,
+                child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Colors.blueAccent,
+                    side: BorderSide(color: Colors.blueAccent),
                   ),
+                  onPressed: () => viewModel.loginWithEmail(
+                    email: emailController.text,
+                    password: passwordController.text,
+                    context: context,
+                  ),
+                  child: Text('Login',
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
+              ),
+              SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.orangeAccent,
+                    side: BorderSide(color: Colors.white),
+                  ),
+                  onPressed: () => viewModel.signInWithGoogle(context),
+                  label: Text('Sign in with Google',
+                      style: TextStyle(fontSize: 18, color: Colors.black)),
+                  icon: Icon(Icons.g_mobiledata, size: 40),
+                ),
+              ),
+              SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.lightGreenAccent,
+                    side: BorderSide(color: Colors.white),
+                  ),
+                  onPressed: () => viewModel.signInAsGuest(context),
+                  icon: Icon(Icons.person_outline, size: 35),
+                  label: Text('Login as guest',
+                      style:
+                      TextStyle(fontSize: 18, color: Colors.black)),
+                ),
+              ),
+              SizedBox(height: 70),
+              TextButton(
+                onPressed: () => viewModel.goToRegister(context),
+                child: Text('Don\'t have an account? Sign up', style: TextStyle(fontSize: 15, color: Colors.black)),
               ),
             ],
           ),

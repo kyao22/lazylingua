@@ -7,6 +7,7 @@ import 'UI/FlashCard.dart';
 import 'UI/LoadingScreen.dart';
 import 'UI/Quiz.dart';
 import 'UI/login_screen.dart';
+import 'UI/register_screen.dart';
 import 'firebase_options.dart';
 import '../UI/Dictionary.dart';
 import '../viewModel/bookmark.dart';
@@ -35,6 +36,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => SplashScreen(),
         '/home': (context) => LoginScreen(),
         '/dictionary': (context) => HomePage(),
+        '/register': (context) => RegisterScreen(),
+        '/login': (context) => LoginScreen(),
       },
     );
   }
