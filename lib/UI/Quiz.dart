@@ -1,8 +1,11 @@
 import 'dart:math';
 import 'dart:ui';  // Thêm import này cho ImageFilter
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../model/wordRepository.dart';
+
+import '../viewModel/steak_manager.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<dynamic> words;
@@ -18,6 +21,7 @@ class _QuizScreenState extends State<QuizScreen> {
   List<String> options = [];
   String? selectedOption;
   bool showResult = false;
+  StreakManager streakManager = StreakManager();
 
   int currentStreak = 0;
   int highestStreak = 0;
@@ -28,11 +32,21 @@ class _QuizScreenState extends State<QuizScreen> {
     allWords = widget.words
         .where((word) => word['senses'] != null && word['senses'].isNotEmpty)
         .toList();
-    loadStreak();
+    _loadStreakData();
     generateQuestion();
   }
 
-  Future<void> loadStreak() async {
+  Future<void> _loadStreakData() async {
+    // Đợi dữ liệu streak được tải về trước khi tiếp tục
+    await streakManager.loadStreak();
+    setState(() {
+      // Sau khi tải xong, bạn có thể cập nhật lại currentStreak và highestStreak
+      currentStreak = streakManager.currentStreak;
+      highestStreak = streakManager.highestStreak;
+    });
+  }
+
+  /*Future<void> loadStreak() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       highestStreak = prefs.getInt('highestStreak') ?? 0;
@@ -49,6 +63,40 @@ class _QuizScreenState extends State<QuizScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('currentStreak', currentStreak);
   }
+
+  Future<void> saveStreakToFirestore() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final highestStreak = prefs.getInt('highestStreak') ?? 0;
+    final currentStreak = prefs.getInt('currentStreak') ?? 0;
+
+    final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
+
+    await docRef.set({
+      'highestStreak': highestStreak,
+      'currentStreak': currentStreak,
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> loadStreakFromFirestore() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
+    final snapshot = await docRef.get();
+
+    if (snapshot.exists) {
+      final data = snapshot.data();
+      if (data != null) {
+        setState(() {
+          highestStreak = data['highestStreak'] ?? 0;
+          currentStreak = data['currentStreak'] ?? 0;
+        });
+      }
+    }
+  }*/
 
   void generateQuestion() {
     if (allWords.length < 4) return;
@@ -91,10 +139,10 @@ class _QuizScreenState extends State<QuizScreen> {
 
       if (isCorrect) {
         currentStreak++;
-        saveCurrentStreak();
+        streakManager.saveCurrentStreak(currentStreak);
         if (currentStreak > highestStreak) {
           highestStreak = currentStreak;
-          saveHighestStreak();
+          streakManager.saveHighestStreak(highestStreak);
         }
       } else {
         currentStreak = 0;

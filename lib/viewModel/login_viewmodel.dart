@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:lazylingua/viewModel/steak_manager.dart';
 import 'package:provider/provider.dart';
 
 import 'bookmark.dart';
@@ -22,6 +23,7 @@ class LoginViewModel {
         const SnackBar(content: Text('Đăng nhập thành công!')),
       );
       await context.read<BookmarkManager>().loadFromFirebase();
+      await context.read<StreakManager>().loadStreakFromFirestore();
       Navigator.pushReplacementNamed(context, '/dictionary');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -43,6 +45,7 @@ class LoginViewModel {
 
       await _auth.signInWithCredential(credential);
       await context.read<BookmarkManager>().loadFromFirebase();
+      await context.read<StreakManager>().loadStreakFromFirestore();
       Navigator.pushReplacementNamed(context, '/dictionary');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

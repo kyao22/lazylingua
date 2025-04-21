@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:lazylingua/viewModel/steak_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:lazylingua/UI/User.dart';
 import 'UI/FlashCard.dart';
@@ -20,8 +21,15 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => BookmarkManager()..loadBookmarks(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => BookmarkManager()..loadBookmarks(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => StreakManager()..loadStreak(),
+        ),
+      ],
       child: MyApp(),
     ),
   );
@@ -52,6 +60,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver{
   int _selectedIndex = 0;
   late Future<List<dynamic>> wordsFuture;
+  StreakManager streakManager = StreakManager();
 
 
   // Danh sách các widget sẽ hiển thị tương ứng với từng nút.
@@ -64,19 +73,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver{
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     WidgetsBinding.instance.removeObserver(this); // Ngừng theo dõi khi bị huỷ
     // Đồng bộ khi rời khỏi app
     final bookmarkManager = Provider.of<BookmarkManager>(context, listen: false);
     bookmarkManager.saveToFirebase(FirebaseAuth.instance.currentUser!.uid); // Hàm bạn đã có trong BookmarkManager
+
+    await streakManager.saveStreakToFirestore();
     super.dispose();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
       final bookmarkManager = Provider.of<BookmarkManager>(context, listen: false);
       bookmarkManager.saveToFirebase(FirebaseAuth.instance.currentUser!.uid); // Gửi lên Firebase khi app chuyển sang nền hoặc bị đóng
+
+      await streakManager.saveStreakToFirestore();
     }
   }
 
